@@ -39,12 +39,18 @@
           </li>
 
         </ul>
-        <form class="d-flex" role="search">
-          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
+       
+
+        <form class="d-flex" role="search" action="search_books.php" method="GET">
+    <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search">
+    <button class="btn btn-outline-success" type="submit">Search</button>
+</form>
+
+<!-- Add a div to display search results -->
+<div id="searchResults"></div>
+
+
       </div>
-    </div>
   </nav>
 </header>
 
@@ -281,8 +287,40 @@ if (isset($_POST['signUp'])) {
 
   if (isset($_POST['logout'])) {
     session_destroy();
-    header("Location: index.php");   
+    header("Location: index.php");
   }  ?>
+</script>
+
+<script>
+  document.querySelector('form[role="search"]').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const query = document.querySelector('input[type="search"]').value;
+
+    fetch('search_books.php?query=' + encodeURIComponent(query))
+      .then(response => response.json())
+      .then(books => {
+        const searchResultsDiv = document.getElementById('searchResults');
+        searchResultsDiv.innerHTML = ''; // Clear previous results
+
+        if (books.length === 0) {
+          searchResultsDiv.innerHTML = '<p>No results found.</p>';
+        } else {
+          books.forEach(book => {
+            const bookCard = `
+                            <div class="card">
+                                <img src="${book.cover}" class="card-img-top h-75">
+                                <div class="card-body">
+                                    <h5 class="card-title">${book.title}</h5>
+                                    <p class="card-subtitle">${book.author}</p>
+                                </div>
+                            </div>
+                        `;
+            searchResultsDiv.innerHTML += bookCard;
+          });
+        }
+      })
+      .catch(error => console.error('Error fetching search results:', error));
+  });
 </script>
 
 <script src="script.js"></script>
